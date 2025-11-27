@@ -12,13 +12,13 @@ reviews:
     - !**/*.txt
 
   high_level_summary: true
-  high_level_summary_instructions: "PR 변경 내용을 한국어로 간단하게 요약해 주세요."
+  high_level_summary_instructions: "PR 변경 내용을 한국어로 요약해 주세요."
 
   suggested_labels: true
 
   tone_instructions: |
     리뷰는 한국어로 작성하고, 상세하고 정중하게 설명해 주세요.
-    가능한 경우, 개선 방안까지 제시해 주세요.
+    개선 방안도 함께 제시해 주세요.
 
   instructions: |
     Spring Boot 프로젝트 기준으로 다음 항목을 검토해 주세요.
