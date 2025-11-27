@@ -1,5 +1,5 @@
 # 기본 이미지 설정
-FROM openjdk:17-jdk-slim
+FROM eclipse-temurin:17-jdk-jammy
 
 # JAR_FILE 경로에 해당하는 파일을 Docker 이미지 내부로 복사
 COPY build/libs/farmon-1.0.0.jar farmon-backend-dev.jar
