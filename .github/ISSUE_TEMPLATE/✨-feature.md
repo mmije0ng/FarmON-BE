@@ -1,8 +1,8 @@
 ---
-name: Custom issue template
-about: Describe this issue template's purpose here.
-title: ''
-labels: ''
+name: "✨ feature"
+about: 기능 추가 이슈
+title: "✨ Feat: "
+labels: "✨ feature"
 assignees: ''
 
 ---
@@ -16,7 +16,7 @@ assignees: ''
     - 제안하는 해결 방법이나 새로운 기능에 대한 구체적인 설명을 추가합니다.
     - 해당 이슈가 구현되었을 때 기대되는 효과를 서술합니다.
 
-## ✅ 작업 목록
-- [ ] **할 일1**: 이 기능 또는 개선 사항을 구현하기 위해 필요한 첫 번째 작업을 작성하세요.
-- [ ] **할 일2**: 두 번째 작업을 작성하세요.
-- [ ] **할 일3**: 추가로 필요한 작업을 나열하세요.
+## ✅ To do
+- [ ] 
+- [ ] 
+- [ ]
