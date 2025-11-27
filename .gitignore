@@ -36,8 +36,17 @@ out/
 ### VS Code ###
 .vscode/
 
-### application ###
+# application
 /src/main/resources/application.yml
 
 # QueryDSL generated sources
 src/main/generated/
+
+# grafana
+grafana
+
+# rabbitmq
+rabbitmq
+
+# redis
+redis

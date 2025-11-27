@@ -93,7 +93,7 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepositoryCustom {
         return queryFactory
                 .selectDistinct(chatRoom)  // 중복 제거
                 .from(chatRoom)
-                .join(chatMessage).on(chatMessage.chatRoom.id.eq(chatRoom.id))
+                .join(chatMessage).on(chatMessage.chatRoom.id.eq(chatRoom.id)).fetchJoin()
                 .where(builder)
                 .orderBy(chatRoom.createdAt.desc())
                 .offset(pageable.getOffset())

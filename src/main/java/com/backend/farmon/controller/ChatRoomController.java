@@ -1,6 +1,7 @@
 package com.backend.farmon.controller;
 
 import com.backend.farmon.apiPayload.ApiResponse;
+import com.backend.farmon.dto.chat.ChatRequest;
 import com.backend.farmon.dto.chat.ChatResponse;
 import com.backend.farmon.service.ChatMessageService.ChatMessageQueryService;
 import com.backend.farmon.service.ChatRoomService.ChatRoomCommandService;
@@ -22,6 +23,8 @@ import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.time.LocalDateTime;
 
 
 @Tag(name = "채팅 페이지", description = "채팅에 관한 API")
@@ -140,13 +143,16 @@ public class ChatRoomController {
     @Parameters({
             @Parameter(name = "userId", description = "로그인한 유저의 아이디(pk)", example = "1", required = true),
             @Parameter(name = "chatRoomId", description = "대화 내역(메시지)을 조회하려는 채팅방의 아이디", example = "1", required = true),
-            @Parameter(name = "page", description = "페이지 번호, 1부터 시작입니다.", example = "1", required = true)
+//            @Parameter(name = "page", description = "페이지 번호, 1부터 시작입니다.", example = "1", required = true)
     })
     @GetMapping("/room/message")
     public ApiResponse<ChatResponse.ChatMessageListDTO> getChatMessageList (@RequestParam(name = "userId") @EqualsUserId @ExistUser Long userId,
                                                                             @RequestParam(name = "chatRoomId") @ExistChatRoom Long chatRoomId,
-                                                                            @CheckPage Integer page) {
-        ChatResponse.ChatMessageListDTO response = chatMessageQueryService.findChatMessageList(userId, chatRoomId, page);
+//                                                                            @CheckPage Integer page,
+                                                                            @RequestParam(name = "lastCreatedAt") LocalDateTime lastCreatedAt,
+                                                                            @RequestParam(name = "lastMessageId") Long lastMessageId) {
+        ChatResponse.ChatMessageListDTO response = chatMessageQueryService.findChatMessageList(userId, chatRoomId, lastCreatedAt, lastMessageId);
+//        ChatResponse.ChatMessageListDTO response = chatMessageQueryService.findChatMessageList(userId, chatRoomId, page);
 
         return ApiResponse.onSuccess(response);
     }

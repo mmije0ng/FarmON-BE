@@ -5,6 +5,8 @@ import com.backend.farmon.validaton.annotation.ExistUser;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 public class ChatRequest {
 
     @ToString
@@ -43,10 +45,10 @@ public class ChatRequest {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    @Schema(description = "전송 또는 수신할 채팅 메시지 정보(테스트용)")
     public static class TestDTO {
-
-        @Schema(description = "보낸 사람 아이디, 현재 로그인한 사용자의 userId와 동일", example = "1")
-        Long senderId;
+        LocalDateTime lastCreatedAt;
+        Long lastMessageId;
     }
+
+
 }
