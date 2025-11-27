@@ -1,40 +1,56 @@
-language: ko
-
 reviews:
   language: ko
-  auto_review: true
+
+  auto_review:
+    enabled: true
 
   path_filters:
-    include:
-      - src/main/java/**
-      - src/main/resources/**
-      - src/test/java/**
-    exclude:
-      - "**/*.md"
-      - "**/*.txt"
+    - src/main/java/**
+    - src/main/resources/**
+    - src/test/java/**
+    - !**/*.md
+    - !**/*.txt
 
-  rules:
-    JavaStyle:
-      enabled: true
-    SpringBootBestPractices:
-      enabled: true
+  high_level_summary: true
+  high_level_summary_instructions: "PR 변경 내용을 한국어로 간단하게 요약해 주세요."
 
-  comment_style:
-    behavior: DETAILED
-    tone: POLITE
-    language: ko
+  suggested_labels: true
 
-commit_message_generation:
-  enabled: true
-  language: ko
+  tone_instructions: |
+    리뷰는 한국어로 작성하고, 상세하고 정중하게 설명해 주세요.
+    가능한 경우, 개선 방안까지 제시해 주세요.
 
-pull_request:
-  summary:
-    enabled: true
-    language: ko
-  labels:
-    enabled: true
+  instructions: |
+    Spring Boot 프로젝트 기준으로 다음 항목을 검토해 주세요.
 
-chat:
-  enabled: true
-  language: ko
+    1. 예외 처리
+       - ControllerAdvice를 통한 공통 처리 여부
+       - RuntimeException 남용 여부
+       - 민감 정보 노출 여부
+
+    2. 코드 품질 & 구조
+       - 단일 책임 원칙(SRP)
+       - 중복 코드 여부
+       - DTO/Entity 변환 구조 올바른지
+
+    3. Spring Web & REST API
+       - HTTP 상태코드 적절성
+       - 컨트롤러에 비즈니스 로직이 없는지
+
+    4. JPA & Query 성능
+       - N+1 문제 여부
+       - Lazy/Fetched join 사용 여부
+       - 불필요한 select 여부
+
+    5. 트랜잭션 관리
+       - @Transactional 위치 적절성
+       - readOnly 사용 여부
+
+    6. 보안
+       - 비밀번호/토큰 로그 출력 방지
+       - @Valid 입력 검증 여부
+
+    7. 테스트
+       - 단위/통합 테스트 균형
+       - Mockito/MockBean 올바른 사용
+       - 예외/경계값 테스트 존재 여부
