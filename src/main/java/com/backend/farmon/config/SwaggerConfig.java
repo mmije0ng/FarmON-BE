@@ -6,11 +6,15 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class SwaggerConfig {
+
+    @Value("${swagger.server-url}")
+    private String swaggerServerUrl;
 
     @Bean
     public OpenAPI FarmONSwagger() {
@@ -31,9 +35,7 @@ public class SwaggerConfig {
                         .bearerFormat("JWT"));
 
         return new OpenAPI()
-                .addServersItem(new Server().url("http://localhost:8080")) // 로컬 서버 URL 설정
-                .addServersItem(new Server().url("https://farmon-be.site")) // 배포된 서버 URL (https)
-                .addServersItem(new Server().url("http://43.201.137.131:8080")) // 배포된 서버 URL (http)
+                .addServersItem(new Server().url(swaggerServerUrl))
                 .info(info)
                 .addSecurityItem(securityRequirement)
                 .components(components);

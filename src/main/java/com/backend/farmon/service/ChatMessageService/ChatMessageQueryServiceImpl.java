@@ -1,14 +1,18 @@
 package com.backend.farmon.service.ChatMessageService;
 
+import com.backend.farmon.config.security.UserAuthorizationUtil;
 import com.backend.farmon.converter.ChatConverter;
 import com.backend.farmon.domain.ChatMessage;
 import com.backend.farmon.dto.chat.ChatResponse;
 import com.backend.farmon.repository.ChatMessageRepository.ChatMessageRepository;
+import com.backend.farmon.service.ValidationService.ValidationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -16,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ChatMessageQueryServiceImpl implements ChatMessageQueryService{
     private final ChatMessageRepository chatMessageRepository;
+    private final ValidationService validationService;
+    private final UserAuthorizationUtil userAuthorizationUtil;
 
     private static final Integer PAGE_SIZE=12;
 
@@ -27,13 +33,18 @@ public class ChatMessageQueryServiceImpl implements ChatMessageQueryService{
     // 채팅 메시지 내역 조회 & 안 읽은 메시지 읽음 처리
     @Transactional
     @Override
-    public ChatResponse.ChatMessageListDTO findChatMessageList(Long userId, Long chatRoomId, Integer pageNumber) {
+    public ChatResponse.ChatMessageListDTO findChatMessageList(Long userId, Long chatRoomId, LocalDateTime lastCreatedAt, Long lastMessageId) {
+        validationService.validateChatRoom(chatRoomId);
+        String role = userAuthorizationUtil.getCurrentUserRole();
+        validationService.validateAuthInChatRoom(userId, chatRoomId, role);
+
         // 안 읽은 메시지들을 읽음 처리
         chatMessageRepository.updateMessagesToReadByChatRoomId(chatRoomId, userId);
         log.info("안 읽은 메시지들 읽음 처리 완료 - chatRoomId: {}", chatRoomId);
 
         // 채팅 메시지 내역 조회 (EXIT, COMPLETE 제외)
-        Slice<ChatMessage> chatMessageList = chatMessageRepository.findTextImageMessagesByChatRoomId(chatRoomId, pageRequest(pageNumber));
+//        Slice<ChatMessage> chatMessageList = chatMessageRepository.findTextImageMessagesByChatRoomId(chatRoomId, pageRequest(pageNumber));
+        Slice<ChatMessage> chatMessageList = chatMessageRepository.findTextImageMessagesByChatRoomId(chatRoomId, lastCreatedAt, lastMessageId, PAGE_SIZE);
         log.info("채팅 메시지 내역 조회 완료 - chatRoomId: {}", chatRoomId);
 
         return ChatConverter.toChatMessageListDTO(chatMessageList, userId);
