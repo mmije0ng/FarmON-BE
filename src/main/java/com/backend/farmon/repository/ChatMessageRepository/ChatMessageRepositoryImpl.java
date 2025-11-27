@@ -110,7 +110,7 @@ public class ChatMessageRepositoryImpl implements ChatMessageRepositoryCustom {
                 .set(chatMessage.isRead, true)
                 .where(
                         chatMessage.chatRoom.id.eq(chatRoomId),
-                        chatMessage.senderId.notIn(userId),
+                        chatMessage.senderId.ne(userId),
                         chatMessage.isRead.isFalse()
                 )
                 .execute();

@@ -7,9 +7,7 @@ reviews:
     enabled: true
 
   path_filters:
-    - src/main/java/**
-    - src/main/resources/**
-    - src/test/java/**
+    - "**"
 
   high_level_summary: true
   high_level_summary_instructions: |

@@ -1,10 +1,11 @@
 package com.backend.farmon.service.ChatMessageService;
 
+import com.backend.farmon.config.security.UserAuthorizationUtil;
 import com.backend.farmon.converter.ChatConverter;
 import com.backend.farmon.domain.ChatMessage;
-import com.backend.farmon.dto.chat.ChatRequest;
 import com.backend.farmon.dto.chat.ChatResponse;
 import com.backend.farmon.repository.ChatMessageRepository.ChatMessageRepository;
+import com.backend.farmon.service.ValidationService.ValidationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
@@ -19,6 +20,8 @@ import java.time.LocalDateTime;
 @Service
 public class ChatMessageQueryServiceImpl implements ChatMessageQueryService{
     private final ChatMessageRepository chatMessageRepository;
+    private final ValidationService validationService;
+    private final UserAuthorizationUtil userAuthorizationUtil;
 
     private static final Integer PAGE_SIZE=12;
 
@@ -31,6 +34,10 @@ public class ChatMessageQueryServiceImpl implements ChatMessageQueryService{
     @Transactional
     @Override
     public ChatResponse.ChatMessageListDTO findChatMessageList(Long userId, Long chatRoomId, LocalDateTime lastCreatedAt, Long lastMessageId) {
+        validationService.validateChatRoom(chatRoomId);
+        String role = userAuthorizationUtil.getCurrentUserRole();
+        validationService.validateAuthInChatRoom(userId, chatRoomId, role);
+
         // 안 읽은 메시지들을 읽음 처리
         chatMessageRepository.updateMessagesToReadByChatRoomId(chatRoomId, userId);
         log.info("안 읽은 메시지들 읽음 처리 완료 - chatRoomId: {}", chatRoomId);

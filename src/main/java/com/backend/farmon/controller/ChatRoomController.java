@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -129,7 +130,7 @@ public class ChatRoomController {
     @Operation(
             summary = "채팅방의 대화 내역 조회",
             description = "채팅방 아이디와 일치하는 채팅방의 채팅 대화 내역을 무한스크롤로 받는 API 입니다. " +
-                    "유저 아이디, 채팅방 아이디, 페이지 번호를 쿼리 스트링으로 입력해주세요."
+                    "첫 요청 시 cursor(lastCreatedAt, lastMessageId)를 비워두고, 이후에는 직전에 받은 마지막 메시지의 createdAt과 id를 전달해 주세요."
     )
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200",description = "OK, 성공"),
@@ -149,8 +150,10 @@ public class ChatRoomController {
     public ApiResponse<ChatResponse.ChatMessageListDTO> getChatMessageList (@RequestParam(name = "userId") @EqualsUserId @ExistUser Long userId,
                                                                             @RequestParam(name = "chatRoomId") @ExistChatRoom Long chatRoomId,
 //                                                                            @CheckPage Integer page,
-                                                                            @RequestParam(name = "lastCreatedAt") LocalDateTime lastCreatedAt,
-                                                                            @RequestParam(name = "lastMessageId") Long lastMessageId) {
+                                                                            @RequestParam(name = "lastCreatedAt", required = false)
+                                                                            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+                                                                            LocalDateTime lastCreatedAt,
+                                                                            @RequestParam(name = "lastMessageId", required = false) Long lastMessageId) {
         ChatResponse.ChatMessageListDTO response = chatMessageQueryService.findChatMessageList(userId, chatRoomId, lastCreatedAt, lastMessageId);
 //        ChatResponse.ChatMessageListDTO response = chatMessageQueryService.findChatMessageList(userId, chatRoomId, page);
 
