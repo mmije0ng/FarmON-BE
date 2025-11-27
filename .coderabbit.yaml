@@ -8,8 +8,6 @@ reviews:
     - src/main/java/**
     - src/main/resources/**
     - src/test/java/**
-    - !**/*.md
-    - !**/*.txt
 
   high_level_summary: true
   high_level_summary_instructions: "PR 변경 내용을 한국어로 요약해 주세요."
