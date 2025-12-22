@@ -92,9 +92,8 @@
 
 &nbsp;
 ## 🛠 Backend Architecture
-<p align="center">
-  <img width="500" alt="image" src="https://github.com/user-attachments/assets/c69c2f8d-6a78-4f3b-9010-9a1d8373b2bf">
-</p>
+<img width="2001" height="1590" alt="image" src="https://github.com/user-attachments/assets/e2cede04-6627-4bb0-bebc-42dc23e1a276" />
+
 
 &nbsp;
 ## 🚀 git flow
