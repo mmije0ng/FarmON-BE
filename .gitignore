@@ -38,15 +38,28 @@ out/
 
 # application
 /src/main/resources/application.yml
+/src/main/resources/application-local.yml
 
 # QueryDSL generated sources
 src/main/generated/
 
 # grafana
-grafana
+grafana/
+
+# prometheus
+prometheus/data/
 
 # rabbitmq
-rabbitmq
+rabbitmq/
 
 # redis
-redis
+redis/
+
+# mysql
+mysql/
+
+# config
+config/
+
+# env
+.env

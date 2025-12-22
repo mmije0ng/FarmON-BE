@@ -8,10 +8,10 @@ services:
       - app-network
     volumes:
       - ./redis/data:/data
-      - ./redis.conf:/usr/local/etc/redis/redis.conf
+      - ./config/redis.conf:/usr/local/etc/redis/redis.conf:ro
     command: ["redis-server", "/usr/local/etc/redis/redis.conf", "--appendonly", "yes"]
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD-SHELL", "redis-cli -a ${REDIS_PASSWORD} ping | grep PONG"]
       interval: 5s
       timeout: 3s
       retries: 10
@@ -24,7 +24,10 @@ services:
     networks:
       - app-network
     environment:
-      REDIS_ADDR: "redis://redis:6379"
+      REDIS_ADDR: "redis://:${REDIS_PASSWORD}@redis:6379"
+    depends_on:
+      redis:
+        condition: service_healthy
 
   rabbitmq:
     container_name: rabbitmq-container
@@ -32,17 +35,17 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
-      - "15692:15692"  # Prometheus Metrics
-      - "61613:61613"  # STOMP
+      - "15692:15692"
+      - "61613:61613"
     networks:
       - app-network
     environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
     volumes:
       - ./rabbitmq/data:/var/lib/rabbitmq
       - ./rabbitmq/log:/var/log/rabbitmq
-      - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+      - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
     command: >
       sh -c "rabbitmq-plugins enable rabbitmq_stomp rabbitmq_web_stomp rabbitmq_prometheus &&
              rabbitmq-server"
@@ -52,6 +55,34 @@ services:
       timeout: 5s
       retries: 10
 
+  #  mysql:
+  #    container_name: mysql-container
+  #    image: mysql:8.0
+  #    ports:
+  #      - "3307:3306"
+  #    networks:
+  #      - app-network
+  #    env_file:
+  #      - .env
+  #    environment:
+  #      MYSQL_DATABASE: ${MYSQL_DATABASE}
+  #      MYSQL_USER: ${MYSQL_USER}
+  #      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+  #      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+  #      TZ: Asia/Seoul
+  #    volumes:
+  #      - ./mysql/data:/var/lib/mysql
+  #      # "config/init.sql"을 컨테이너 기동 시 자동 실행되게 함 (초기 1회)
+  #      - ./config/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+  #    command: >
+  #      --character-set-server=utf8mb4
+  #      --collation-server=utf8mb4_unicode_ci
+  #    healthcheck:
+  #      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p$$MYSQL_ROOT_PASSWORD --silent"]
+  #      interval: 5s
+  #      timeout: 5s
+  #      retries: 20
+
   prometheus:
     container_name: prometheus-container
     image: prom/prometheus:latest
@@ -60,7 +91,8 @@ services:
     networks:
       - app-network
     volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/data:/prometheus
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
       - "--storage.tsdb.path=/prometheus"
@@ -75,41 +107,45 @@ services:
     volumes:
       - ./grafana:/var/lib/grafana
     environment:
-      GF_SECURITY_ADMIN_USER: admin
-      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
+    depends_on:
+      - prometheus
 
-#  backend:
-#    container_name: spring-app
-#    image: ${DOCKER_USERNAME}/${DOCKER_REPO}:latest
-#    env_file:
-#      - .env
-#    ports:
-#      - "8080:8080"
-#    networks:
-#      - app-network
+  #  backend:
+  #    container_name: spring-app
+  #    image: farmon-backend
+  #    build:
+  #      context: .
+  #      dockerfile: Dockerfile
+  #    ports:
+  #      - "8080:8080"
+  #    networks:
+  #      - app-network
+  #    depends_on:
+  #      redis:
+  #        condition: service_healthy
+  #      rabbitmq:
+  #        condition: service_healthy
+  #      mysql:
+  #        condition: service_healthy
+  #    env_file:
+  #      - .env
+
+  nginx:
+    container_name: nginx-container
+    image: nginx:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - app-network
+    volumes:
+      - ./config/nginx.conf:/etc/nginx/nginx.conf:ro
 #    depends_on:
-#      redis:
-#        condition: service_healthy
-#      rabbitmq:
-#        condition: service_healthy
-#    environment:
-#      SPRING_REDIS_HOST: redis
-#      SPRING_RABBITMQ_HOST: rabbitmq
-#
-#  nginx:
-#    container_name: nginx-container
-#    image: nginx:latest
-#    ports:
-#      - "80:80"
-#      - "443:443"
-#    networks:
-#      - app-network
-#    volumes:
-#      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-#    depends_on:
-#      backend:
-#        condition: service_healthy
+#      - backend
 
 networks:
   app-network:
     driver: bridge
+
