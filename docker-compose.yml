@@ -40,8 +40,8 @@ services:
     networks:
       - app-network
     environment:
-      RABBITMQ_USERNAME: ${RABBITMQ_USER}
-      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
     volumes:
       - ./rabbitmq/data:/var/lib/rabbitmq
       - ./rabbitmq/log:/var/log/rabbitmq
