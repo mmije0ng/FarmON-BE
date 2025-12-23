@@ -14,24 +14,21 @@ reviews:
   path_filters:
     - "**"
 
+  # high_level_summary 자체는 켜둠(요약 생성 기능 유지)
+  high_level_summary: true
+
   suggested_labels: true
 
   path_instructions:
     - path: "**"
       instructions: |
-        START YOUR REVIEW WITH "PR Change Summary"
-        IMPORTANT OUTPUT FORMAT (must follow):
-        1) PR Change Summary (Korean)
-           - Major changes (3–7 items): one line each describing what/why/how it changed
-           - Impact scope: affected modules/features/endpoints/events/tables
-           - Compatibility/Migration: config changes, data migrations, deployment notes (if any)
-           - Risks & rollback points: potential risks and how to revert (flags/config/steps)
+        First, write a high-level summary in Korean using this exact structure:
+        - Major changes (3–7 items): one line each describing what/why/how it changed
+        - Impact scope: affected modules/features/endpoints/events/tables
+        - Compatibility/Migration: config changes, data migrations, deployment notes (if any)
+        - Risks & rollback points: potential risks and how to revert (flags/config/steps)
 
-        Then, review this Spring Boot project based on the criteria below.
-
-        0. Strengthen the change summary
-           - First, identify the PR’s core changes (feature/structure/performance/security).
-           - If the flow changed, explain which paths were added/removed/replaced.
+        Then review this Spring Boot project based on the criteria below.
 
         1. Exception handling
            - Check if global exception handling exists via @ControllerAdvice / @ExceptionHandler
@@ -65,7 +62,7 @@ reviews:
            - Check use of @Valid / Bean Validation
            - Identify any authentication/authorization bypass risks
 
-        7. Architecture diagram / flow validation (extra)
+        7. Architecture diagram / flow validation
            - If the PR description includes an architecture diagram, verify it matches the actual code flow.
            - If there is no diagram, summarize the main request/event flows step-by-step in text.
 
