@@ -6,28 +6,28 @@ tone_instructions: |
   Please write the review in Korean with a polite tone, and provide concrete improvement suggestions instead of only pointing out issues.
 
 reviews:
+  profile: assertive
+
   auto_review:
     enabled: true
 
   path_filters:
     - "**"
 
-  high_level_summary: true
-  high_level_summary_instructions: |
-    Please summarize the PR changes clearly and concisely in Korean.
-
-    You MUST follow this format:
-    - Major changes (3–7 items): one line each describing what/why/how it changed
-    - Impact scope: affected modules/features/endpoints/events/tables
-    - Compatibility/Migration: config changes, data migrations, deployment notes (if any)
-    - Risks & rollback points: potential risks and how to revert (flags/config/steps)
-
   suggested_labels: true
 
   path_instructions:
     - path: "**"
       instructions: |
-        Please review this Spring Boot project based on the criteria below.
+        START YOUR REVIEW WITH "PR Change Summary"
+        IMPORTANT OUTPUT FORMAT (must follow):
+        1) PR Change Summary (Korean)
+           - Major changes (3–7 items): one line each describing what/why/how it changed
+           - Impact scope: affected modules/features/endpoints/events/tables
+           - Compatibility/Migration: config changes, data migrations, deployment notes (if any)
+           - Risks & rollback points: potential risks and how to revert (flags/config/steps)
+
+        Then, review this Spring Boot project based on the criteria below.
 
         0. Strengthen the change summary
            - First, identify the PR’s core changes (feature/structure/performance/security).
