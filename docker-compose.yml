@@ -55,33 +55,32 @@ services:
       timeout: 5s
       retries: 10
 
-  #  mysql:
-  #    container_name: mysql-container
-  #    image: mysql:8.0
-  #    ports:
-  #      - "3307:3306"
-  #    networks:
-  #      - app-network
-  #    env_file:
-  #      - .env
-  #    environment:
-  #      MYSQL_DATABASE: ${MYSQL_DATABASE}
-  #      MYSQL_USER: ${MYSQL_USER}
-  #      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-  #      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-  #      TZ: Asia/Seoul
-  #    volumes:
-  #      - ./mysql/data:/var/lib/mysql
-  #      # "config/init.sql"을 컨테이너 기동 시 자동 실행되게 함 (초기 1회)
-  #      - ./config/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
-  #    command: >
-  #      --character-set-server=utf8mb4
-  #      --collation-server=utf8mb4_unicode_ci
-  #    healthcheck:
-  #      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p$$MYSQL_ROOT_PASSWORD --silent"]
-  #      interval: 5s
-  #      timeout: 5s
-  #      retries: 20
+  mysql:
+    container_name: mysql-container
+    image: mysql:8.0
+    ports:
+      - "3307:3306"
+    networks:
+      - app-network
+    env_file:
+      - .env
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      TZ: Asia/Seoul
+    volumes:
+      - ./mysql/data:/var/lib/mysql
+      - ./config/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    command: >
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
 
   prometheus:
     container_name: prometheus-container
@@ -112,25 +111,25 @@ services:
     depends_on:
       - prometheus
 
-  #  backend:
-  #    container_name: spring-app
-  #    image: farmon-backend
-  #    build:
-  #      context: .
-  #      dockerfile: Dockerfile
-  #    ports:
-  #      - "8080:8080"
-  #    networks:
-  #      - app-network
-  #    depends_on:
-  #      redis:
-  #        condition: service_healthy
-  #      rabbitmq:
-  #        condition: service_healthy
-  #      mysql:
-  #        condition: service_healthy
-  #    env_file:
-  #      - .env
+#  backend:
+#    container_name: spring-app
+#    image: farmon-backend
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    ports:
+#      - "8080:8080"
+#    networks:
+#      - app-network
+#    depends_on:
+#      redis:
+#        condition: service_healthy
+#      rabbitmq:
+#        condition: service_healthy
+#      mysql:
+#        condition: service_healthy
+#    env_file:
+#      - .env
 
   nginx:
     container_name: nginx-container
