@@ -16,8 +16,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static com.backend.farmon.domain.QPostImg.postImg;
 
@@ -32,12 +31,11 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     QBoard board = QBoard.board;
     QCrop crop = QCrop.crop;
     QBoardPost boardPost= QBoardPost.boardPost;
+    QPost originalPost = new QPost("originalPost");
 
     // 전체 게시글 3개 조회
     @Override
     public List<Post> findTopPosts(Integer limit) {
-        QPost originalPost = new QPost("originalPost");
-
         return queryFactory.selectFrom(originalPost)
                 .where(originalPost.id.in(
                         JPAExpressions.select(post.originalPostId) // 현재 게시글의 원본 ID를 가져옴
@@ -53,20 +51,40 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     // 인기 게시글 3개 조회
     @Override
     public List<Post> findTopPostsByLikes(Integer limit) {
-        QPost originalPost = new QPost("originalPost");
+        QPost currentPost  = new QPost("currentPost");
 
-        return queryFactory.selectFrom(originalPost)
-                .leftJoin(originalPost.postlikes, likeCount).fetchJoin()
+        // 1) 정렬/집계는 여기서만: 상위 postId 목록 조회
+        List<Long> topIds = queryFactory
+                .select(originalPost.id)
+                .from(originalPost)
+                .leftJoin(originalPost.postlikes, likeCount)
                 .where(originalPost.id.in(
-                        JPAExpressions.select(post.originalPostId) // 현재 게시글의 원본 ID를 가져옴
-                                .from(post)
-                                .where(post.board.postType.eq(PostType.POPULAR)
-                                        .and(post.originalPostId.isNotNull())) // original_post_id가 있는 경우만 조회
+                        JPAExpressions.select(currentPost.originalPostId)
+                                .from(currentPost)
+                                .where(currentPost.board.postType.eq(PostType.POPULAR)
+                                        .and(currentPost.originalPostId.isNotNull()))
                 ))
-                .groupBy(originalPost)
-                .orderBy(likeCount.count().desc(), originalPost.createdAt.desc())
+                .groupBy(originalPost.id)
+                .orderBy(likeCount.id.count().desc(), originalPost.createdAt.desc())
                 .limit(limit)
                 .fetch();
+
+        if (topIds.isEmpty()) return List.of();
+
+        // 2) 연관 컬렉션은 여기서 fetchJoin으로 한 번에 로딩 (N+1 방지)
+        List<Post> posts = queryFactory
+                .selectFrom(originalPost)
+                .distinct() // fetchJoin으로 중복 row가 생기므로 중복 제거
+                .leftJoin(originalPost.postlikes, likeCount).fetchJoin()
+                .where(originalPost.id.in(topIds))
+                .fetch();
+
+        // 3) IN 조회는 순서 보장이 없으니 topIds 순서대로 정렬 보정
+        Map<Long, Integer> order = new HashMap<>();
+        for (int i = 0; i < topIds.size(); i++) order.put(topIds.get(i), i);
+        posts.sort(Comparator.comparingInt(p -> order.get(p.getId())));
+
+        return posts;
     }
 
     // 게시판 타입별로 조회 (전문가 칼럼, Q&A)
