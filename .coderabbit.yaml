@@ -1,34 +1,39 @@
 # yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
-
 language: ko-KR
-
-tone_instructions: |
-  Please write the review in Korean with a polite tone, and provide concrete improvement suggestions instead of only pointing out issues.
-
+tone_instructions: >
+  Please write the review in Korean with a polite tone, and provide concrete improvement suggestions
+  instead of only pointing out issues.
 reviews:
   profile: assertive
-
-  auto_review:
-    enabled: true
-
+  request_changes_workflow: true
+  high_level_summary_instructions: |-
+    Please summarize the PR changes clearly and concisely in English.
+    Follow the exact format below.
+    - Key changes (3–7 items): one line each describing what/why/how it changed
+    - Impact scope: affected modules/features/endpoints/events/tables
+    - Compatibility/Migration: note any config changes, data migrations, or deployment precautions
+    - Risks & rollback points: potential risks and how to revert (or flags/config to disable)
+  high_level_summary_in_walkthrough: true
+  collapse_walkthrough: false
+  poem: false
   path_filters:
-    - "**"
-
-  # high_level_summary 자체는 켜둠(요약 생성 기능 유지)
-  high_level_summary: true
-
-  suggested_labels: true
-
+    - '**'
   path_instructions:
-    - path: "**"
-      instructions: |
+    - path: '**'
+      instructions: >
         First, write a high-level summary in Korean using this exact structure:
+
         - Major changes (3–7 items): one line each describing what/why/how it changed
+
         - Impact scope: affected modules/features/endpoints/events/tables
+
         - Compatibility/Migration: config changes, data migrations, deployment notes (if any)
+
         - Risks & rollback points: potential risks and how to revert (flags/config/steps)
 
+
         Then review this Spring Boot project based on the criteria below.
+
 
         1. Exception handling
            - Check if global exception handling exists via @ControllerAdvice / @ExceptionHandler
@@ -66,4 +71,8 @@ reviews:
            - If the PR description includes an architecture diagram, verify it matches the actual code flow.
            - If there is no diagram, summarize the main request/event flows step-by-step in text.
 
-        Considering all items above, propose improvements and provide concrete ways to implement them.
+        Considering all items above, propose improvements and provide concrete ways to implement
+        them.
+issue_enrichment:
+  auto_enrich:
+    enabled: true
