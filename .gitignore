@@ -39,6 +39,7 @@ out/
 # application
 /src/main/resources/application.yml
 /src/main/resources/application-local.yml
+/src/main/resources/application-dev.yml
 
 # QueryDSL generated sources
 src/main/generated/
@@ -48,6 +49,7 @@ grafana/
 
 # prometheus
 prometheus/data/
+prometheus/dev/
 
 # rabbitmq
 rabbitmq/
@@ -59,7 +61,11 @@ redis/
 mysql/
 
 # config
-config/
+config/dev
+config/init.sql
 
 # env
 .env
+
+# docker
+docker-compose.dev.yml
