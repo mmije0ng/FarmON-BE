@@ -61,7 +61,8 @@ redis/
 mysql/
 
 # config
-config/
+config/dev
+config/init.sql
 
 # env
 .env
