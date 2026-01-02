@@ -32,17 +32,38 @@ jobs:
             cd /home/ubuntu
 
             if [ -f /home/ubuntu/docker-compose.yml ] && [ -f /home/ubuntu/docker-compose.dev.yml ]; then
+              # grafana 볼륨 권한 사전 세팅
+              sudo chown -R 472:472 /home/ubuntu/grafana
+
+              # prometheus 볼륨 권한 사전 세팅 (Exited(2) 방지)
+              sudo chown -R 65534:65534 /home/ubuntu/prometheus
+
+              # 1) 백엔드 이미지 최신으로 pull (서비스명: backend)
               sudo docker compose \
                 --env-file /home/ubuntu/.env \
                 -f /home/ubuntu/docker-compose.yml \
                 -f /home/ubuntu/docker-compose.dev.yml \
-                pull
+                pull backend
+
+              # 2) 스프링 백엔드 컨테이너만 중지/삭제 후 재기동 (다른 컨테이너 유지)
+              sudo docker compose \
+                --env-file /home/ubuntu/.env \
+                -f /home/ubuntu/docker-compose.yml \
+                -f /home/ubuntu/docker-compose.dev.yml \
+                stop backend || true
 
               sudo docker compose \
                 --env-file /home/ubuntu/.env \
                 -f /home/ubuntu/docker-compose.yml \
                 -f /home/ubuntu/docker-compose.dev.yml \
-                up -d --remove-orphans
+                rm -f backend || true
+
+              sudo docker compose \
+                --env-file /home/ubuntu/.env \
+                -f /home/ubuntu/docker-compose.yml \
+                -f /home/ubuntu/docker-compose.dev.yml \
+                up -d --no-deps --force-recreate backend
+
             else
               echo "docker-compose.yml or docker-compose.dev.yml not found. Exiting."
               exit 1
