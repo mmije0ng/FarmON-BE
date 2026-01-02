@@ -49,6 +49,7 @@ grafana/
 
 # prometheus
 prometheus/data/
+prometheus/dev/
 
 # rabbitmq
 rabbitmq/
@@ -64,3 +65,6 @@ config/
 
 # env
 .env
+
+# docker
+docker-compose.dev.yml
