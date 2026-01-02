@@ -23,10 +23,29 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - name: Make application-dev.yml
+      # .env 생성
+      - name: Make .env
+        run: |
+          printf "%s" "${{ secrets.ENV_DEV }}" > .env
+          echo "✅ .env created with keys:"
+          cut -d= -f1 .env | sort
+        shell: bash
+
+      # application-dev.yml 템플릿 생성 후 env 값 주입
+      - name: Make application-dev.yml from secret template
         run: |
           mkdir -p src/main/resources
-          printf "%s" "${{ secrets.APPLICATION_DEV_YML }}" > src/main/resources/application-dev.yml
+          printf "%s" "${{ secrets.APPLICATION_DEV_YML_TEMPLATE }}" > src/main/resources/application-dev.yml.template
+
+          # 환경변수 로드 및 값 치환
+          set -a
+          source .env
+          set +a
+
+          envsubst < src/main/resources/application-dev.yml.template > src/main/resources/application-dev.yml
+
+          echo "✅ application-dev.yml generated with environment substitution:"
+          sed -n '1,40p' src/main/resources/application-dev.yml
         shell: bash
 
       - name: Setup Gradle
