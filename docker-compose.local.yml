@@ -12,9 +12,31 @@ services:
       - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
 
   mysql:
+    container_name: mysql-container
+    image: mysql:8.0
+    ports:
+      - "3307:3306"
+    networks:
+      - app-network
+    env_file:
+      - .env
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      TZ: Asia/Seoul
+    command: >
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: [ "CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p$$MYSQL_ROOT_PASSWORD --silent" ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
     volumes:
       - ./mysql/data:/var/lib/mysql
-      - ./config/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - - ./config/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
 
   prometheus:
     volumes:
