@@ -18,17 +18,6 @@ jobs:
       - name: Checkout (to get compose files)
         uses: actions/checkout@v4
 
-      - name: Copy docker-compose files to EC2
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.HOST }}
-          username: ubuntu
-          key: ${{ secrets.KEY }}
-          source: |
-            docker-compose.yml
-            docker-compose.dev.yml
-          target: /home/ubuntu/
-
       - name: Deploy on EC2
         uses: appleboy/ssh-action@master
         with:

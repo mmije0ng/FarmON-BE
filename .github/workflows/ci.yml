@@ -29,21 +29,11 @@ jobs:
           printf "%s" "${{ secrets.APPLICATION_DEV_YML }}" > src/main/resources/application-dev.yml
         shell: bash
 
-      - name: Create .env from secret
-        run: |
-          printf "%s" "${{ secrets.ENV }}" > .env
-        shell: bash
-
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
-      - name: Build with Gradle (load .env)
-        run: |
-          set -a
-          source .env
-          export $(grep -v '^#' .env | xargs)
-          set +a
-          ./gradlew clean build -x test
+      - name: Build with Gradle (skip test)
+        run: ./gradlew clean build -x test
         shell: bash
 
       - name: Set up Docker Build
