@@ -40,12 +40,6 @@ services:
       - ./config/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
 
   prometheus:
-    container_name: prometheus-container
-    image: prom/prometheus:latest
-    ports:
-      - "9090:9090"
-    networks:
-      - app-network
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - ./prometheus/data:/prometheus

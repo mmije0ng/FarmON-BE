@@ -65,6 +65,8 @@ services:
     command:
       - "--config.file=/etc/prometheus/prometheus.yml.template"
       - "--storage.tsdb.path=/prometheus"
+    environment:
+      TZ: Asia/Seoul
 
   grafana:
     container_name: grafana-container
@@ -78,6 +80,7 @@ services:
     environment:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
+      TZ: Asia/Seoul
     depends_on:
       - prometheus
 
