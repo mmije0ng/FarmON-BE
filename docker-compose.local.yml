@@ -36,7 +36,7 @@ services:
       retries: 20
     volumes:
       - ./mysql/data:/var/lib/mysql
-      - - ./config/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - ./config/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
 
   prometheus:
     volumes:
