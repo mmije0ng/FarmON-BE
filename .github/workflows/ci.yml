@@ -26,18 +26,27 @@ jobs:
       - name: Make application-dev.yml
         run: |
           mkdir -p src/main/resources
-          echo "${{ secrets.APPLICATION_DEV_YML }}" > src/main/resources/application-dev.yml
+          printf "%s" "${{ secrets.APPLICATION_DEV_YML }}" > src/main/resources/application-dev.yml
         shell: bash
 
-      # Gradle 캐싱/설정(권장)
+      - name: Create .env from secret
+        run: |
+          printf "%s" "${{ secrets.ENV }}" > .env
+        shell: bash
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
-      - name: Build with Gradle
-        run: ./gradlew clean build
+      - name: Build with Gradle (load .env)
+        run: |
+          set -a
+          source .env
+          export $(grep -v '^#' .env | xargs)
+          set +a
+          ./gradlew clean build -x test
+        shell: bash
 
-      # PR에서는 푸시하지 않도록 제한
-      - name: Set up Docker Buildx
+      - name: Set up Docker Build
         if: github.event_name == 'push'
         uses: docker/setup-buildx-action@v3
 
