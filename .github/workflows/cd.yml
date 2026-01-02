@@ -33,19 +33,26 @@ jobs:
 
             if [ -f /home/ubuntu/docker-compose.yml ] && [ -f /home/ubuntu/docker-compose.dev.yml ]; then
               # grafana 볼륨 권한 사전 세팅
-              sudo chown -R 472:472 /home/ubuntu/grafana
+              sudo chown -R 472:472 /home/ubuntu/grafana || true
 
               # prometheus 볼륨 권한 사전 세팅 (Exited(2) 방지)
-              sudo chown -R 65534:65534 /home/ubuntu/prometheus
+              sudo chown -R 65534:65534 /home/ubuntu/prometheus || true
 
-              # 1) 백엔드 이미지 최신으로 pull (서비스명: backend)
+              # 0) (선택) 전체 서비스 최신 이미지 pull (원치 않으면 제거)
+              # sudo docker compose \
+              #   --env-file /home/ubuntu/.env \
+              #   -f /home/ubuntu/docker-compose.yml \
+              #   -f /home/ubuntu/docker-compose.dev.yml \
+              #   pull
+
+              # 1) 백엔드 이미지만 최신으로 pull
               sudo docker compose \
                 --env-file /home/ubuntu/.env \
                 -f /home/ubuntu/docker-compose.yml \
                 -f /home/ubuntu/docker-compose.dev.yml \
                 pull backend
 
-              # 2) 스프링 백엔드 컨테이너만 중지/삭제 후 재기동 (다른 컨테이너 유지)
+              # 2) backend만 중지/삭제 후 재기동
               sudo docker compose \
                 --env-file /home/ubuntu/.env \
                 -f /home/ubuntu/docker-compose.yml \
@@ -63,6 +70,14 @@ jobs:
                 -f /home/ubuntu/docker-compose.yml \
                 -f /home/ubuntu/docker-compose.dev.yml \
                 up -d --no-deps --force-recreate backend
+
+              # 3) 나머지 컨테이너들도 전부 up (없으면 생성/죽었으면 재기동)
+              # backend는 이미 띄웠으니, --no-recreate로 건드리지 않게 하는 편이 안전
+              sudo docker compose \
+                --env-file /home/ubuntu/.env \
+                -f /home/ubuntu/docker-compose.yml \
+                -f /home/ubuntu/docker-compose.dev.yml \
+                up -d --no-recreate
 
             else
               echo "docker-compose.yml or docker-compose.dev.yml not found. Exiting."
