@@ -36,7 +36,7 @@ jobs:
         run: ./gradlew clean build -x test
         shell: bash
 
-      - name: Set up Docker Build
+      - name: Set up Docker Buildx
         if: github.event_name == 'push'
         uses: docker/setup-buildx-action@v3
 
