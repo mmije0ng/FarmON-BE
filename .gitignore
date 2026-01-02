@@ -62,6 +62,7 @@ mysql/
 
 # config
 config/dev
+config/local
 config/init.sql
 
 # env
