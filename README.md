@@ -1,4 +1,4 @@
-# [최종 성능 개선 보고서] 홈 화면 API 단계별 최적화 및 1,000 VUs 가용성 검증
+# [성능 개선 보고서] 홈 화면 API 단계별 최적화 및 1,000 VUs 가용성 검증
 
 본 보고서는 홈 화면의 커뮤니티 게시글 조회 API를 대상으로, 초기 성능 측정부터 로직/인프라/아키텍처 최적화에 따른 시스템 임계치 변화를 정량적으로 분석한 기록입니다.
 
@@ -35,7 +35,7 @@
 <img width="1280" height="675" alt="v1_result_1" src="https://github.com/user-attachments/assets/d045e6f8-4323-4782-acf0-0a24ae35b3da" />
 <img width="1280" height="989" alt="v1_result_2" src="https://github.com/user-attachments/assets/4ea13c6b-080b-4892-b88d-4475ffbbf03f" />
 
-### 2.2 최종 실험 결과 (1,000 VUs)
+### 2.2 실험 결과 (1,000 VUs)
 | 지표 항목 | 측정 결과 | 판정 및 의미 |
 | :--- | :--- | :--- |
 | **p(95) Latency** | **6.7s** | **Fail**: 목표치(2s) 대비 3배 이상 지연 |
@@ -86,7 +86,7 @@
 
 ---
 
-## 5. [v4] 최종 개선: Redis 캐시 도입 (In-memory 아키텍처)
+## 5. [v4] 개선: Redis 캐시 도입 (In-memory 아키텍처)
 
 ### ✅ 변경 사항 (What was changed?)
 - **캐싱 전략**: 홈 커뮤니티 데이터를 `category:{PostType}` 키 구조로 **Redis**에 저장 (In-memory)
@@ -101,7 +101,7 @@
 <img width="1280" height="706" alt="v4_result_1" src="https://github.com/user-attachments/assets/560b66db-4e21-47fa-bfdc-7e07f844d14f" />
 <img width="1280" height="584" alt="v4_result_3" src="https://github.com/user-attachments/assets/9678d362-afd9-4005-a415-46f93f8c07bb" />
 
-### 5.2 최종 성능 지표 비교 (v1 ~ v4)
+### 5.2 성능 지표 비교 (v1 ~ v4)
 | 지표 항목 | v1 (Baseline) | v2 (로직) | v3 (설정) | v4 (Redis) | 성과 (v1 vs v4) |
 | :--- | :---: | :---: | :---: | :---: | :---: |
 | **p(95) Latency** | 6.71s | 3.38s | 3.30s | **2.56s** | **62% 단축** |
@@ -119,5 +119,5 @@
 | **p(99) Latency** | **5.0s 미만** | - | **3.98s** | **통과** |
 | **Error Rate** | **1.0% 미만** | 0.005% | **0.009%** | **통과** |
 
-**최종 결론**:  
+**향후 목표**:  
 로직, 인프라, 캐싱 최적화를 통해 비약적인 성능 향상을 거두었으나, 1,000 VU 환경에서 단일 인스턴스의 CPU 부하로 인해 p(95) 2.0s 목표에는 미달했습니다. 향후 **인스턴스 확장(Scale-out)** 및 **로드밸런서(ALB)** 적용을 통해 자원 부하를 분산하고 최종 목표 지표를 달성할 예정입니다.
