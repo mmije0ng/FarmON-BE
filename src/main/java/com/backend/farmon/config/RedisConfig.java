@@ -12,6 +12,8 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.*;
 
+import java.time.Duration;
+
 @Configuration
 public class RedisConfig {
 
@@ -81,15 +83,19 @@ public class RedisConfig {
     }
 
     @Bean
-    public RedisCacheManager redisCacheManager(RedisConnectionFactory redisConnectionFactory) {
-        RedisCacheConfiguration redisCacheConfiguration = RedisCacheConfiguration.defaultCacheConfig()
-                .entryTtl(java.time.Duration.ofSeconds(60))
+    public RedisCacheManager redisCacheManager(RedisConnectionFactory cf) {
+        RedisCacheConfiguration base = RedisCacheConfiguration.defaultCacheConfig()
                 .disableCachingNullValues()
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()));
 
-        return RedisCacheManager.builder(redisConnectionFactory)
-                .cacheDefaults(redisCacheConfiguration)
+        RedisCacheConfiguration homeCommunity = base.entryTtl(Duration.ofSeconds(60));
+        RedisCacheConfiguration popularExpert = base.entryTtl(Duration.ofMinutes(5));
+
+        return RedisCacheManager.builder(cf)
+                .cacheDefaults(base)
+                .withCacheConfiguration("home:community", homeCommunity)
+                .withCacheConfiguration("home:popularExpertColumn", popularExpert)
                 .build();
     }
 }
