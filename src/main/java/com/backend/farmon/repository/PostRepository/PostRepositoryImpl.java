@@ -144,24 +144,10 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
 
     // 인기 전문가 칼럼 6개 조회
     @Override
-    public List<PopularExpertPostRow> findTop6ExpertColumnRowsByPopularIds(List<Long> popularPostsIdList, int limit) {
+    public List<PopularExpertPostRow> findTopExpertColumnRowsByPopularIds(List<Long> popularPostsIdList, int limit) {
         QPostImg pi2 = new QPostImg("pi2");
 
         boolean hasPinned = popularPostsIdList != null && !popularPostsIdList.isEmpty();
-
-        // pinned 우선 정렬(1) / 나머지(2)
-        var pinnedFirstOrderExpr = new CaseBuilder()
-                .when(post.id.in(popularPostsIdList)).then(1)
-                .otherwise(2);
-
-        // pinned 내부 순서 유지 (MySQL: FIELD)
-        assert popularPostsIdList != null;
-        var pinnedInnerOrderExpr = Expressions.numberTemplate(
-                Integer.class,
-                "FIELD({0}, {1})",
-                post.id,
-                Expressions.constant(popularPostsIdList)
-        );
 
         var query = queryFactory
                 .select(Projections.constructor(
@@ -194,8 +180,21 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                         postImg.storedFileName
                 );
 
-        // QueryDSL orderBy에 null 전달 방지: hasPinned 여부로 분기 처리
+        // QueryDSL orderBy에 null 전달 방지 + pinned 조건부 생성
         if (hasPinned) {
+            // pinned 우선 정렬(1) / 나머지(2)
+            var pinnedFirstOrderExpr = new CaseBuilder()
+                    .when(post.id.in(popularPostsIdList)).then(1)
+                    .otherwise(2);
+
+            // pinned 내부 순서 유지 (MySQL: FIELD)
+            var pinnedInnerOrderExpr = Expressions.numberTemplate(
+                    Integer.class,
+                    "FIELD({0}, {1})",
+                    post.id,
+                    Expressions.constant(popularPostsIdList)
+            );
+
             query.orderBy(
                     pinnedFirstOrderExpr.asc(),
                     pinnedInnerOrderExpr.asc(),
