@@ -21,7 +21,7 @@ public interface PostRepositoryCustom {
     List<HomePostRow> findTopPostsByPostTypeWithCounts(PostType postType, int limit);
 
     // 인기 전문가 칼럼 6개 조회
-    List<PopularExpertPostRow> findTop6ExpertColumnRowsByPopularIds(List<Long> popularPostsIdList);
+    List<PopularExpertPostRow> findTop6ExpertColumnRowsByPopularIds(List<Long> popularPostsIdList, int limit);
 
     // 필터링없이 조회 
     Page<Post> findAllByBoardId(Long boardId, Pageable pageable);

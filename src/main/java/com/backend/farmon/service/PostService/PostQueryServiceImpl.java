@@ -42,6 +42,8 @@ public class PostQueryServiceImpl implements PostQueryService {
     private final BoardRepository boardRepository;
     private final S3Service s3Service;
     private static final Integer POST_LIMIT=3;
+    private static final Integer POPULAR_EXPERT_POST_LIMIT=6;
+    private static final long EXPERT_COLUMN_BOARD_ID = 4L;
 
     // 홈 화면 카테고리에 따른 커뮤니티 게시글 3개씩 조회
     // 인기, 전체, QNA, 전문가 칼럼
@@ -73,10 +75,10 @@ public class PostQueryServiceImpl implements PostQueryService {
             unless = "#result == null"
     )
     public HomeResponse.PopularPostListDTO findPopularExpertColumnPosts() {
-        List<Long> popularPostsIdList = List.of(4L);
+        List<Long> popularPostsIdList = List.of(EXPERT_COLUMN_BOARD_ID);
 
         List<PopularExpertPostRow> expertColumnPostList =
-                postRepository.findTop6ExpertColumnRowsByPopularIds(popularPostsIdList);
+                postRepository.findTop6ExpertColumnRowsByPopularIds(popularPostsIdList, POPULAR_EXPERT_POST_LIMIT);
 
         if (log.isDebugEnabled())
             log.debug("홈 화면 인기 전문가 칼럼 조회 DB query executed");

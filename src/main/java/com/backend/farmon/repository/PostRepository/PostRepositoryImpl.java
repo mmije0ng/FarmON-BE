@@ -144,32 +144,26 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
 
     // 인기 전문가 칼럼 6개 조회
     @Override
-    public List<PopularExpertPostRow> findTop6ExpertColumnRowsByPopularIds(List<Long> popularPostsIdList) {
-        // 첫 번째 이미지만 가져오기 위한 서브쿼리: 해당 post의 postImg 중 가장 작은 id
+    public List<PopularExpertPostRow> findTop6ExpertColumnRowsByPopularIds(List<Long> popularPostsIdList, int limit) {
         QPostImg pi2 = new QPostImg("pi2");
 
         boolean hasPinned = popularPostsIdList != null && !popularPostsIdList.isEmpty();
 
-        // 인기 ID 우선 정렬(1) / 나머지(2)
-        // pinnedFirst = 1이면 상단, 2면 하단
-        var pinnedFirstOrderExpr = hasPinned
-                ? new CaseBuilder()
+        // pinned 우선 정렬(1) / 나머지(2)
+        var pinnedFirstOrderExpr = new CaseBuilder()
                 .when(post.id.in(popularPostsIdList)).then(1)
-                .otherwise(2)
-                : null;
+                .otherwise(2);
 
-        // pinned list 내부 정렬 (MySQL: FIELD)
-        // pinnedIds가 있으면 FIELD(post.id, [ids]) ASC 로 pinned 내부 순서를 유지
-        var pinnedInnerOrderExpr = hasPinned
-                ? Expressions.numberTemplate(
+        // pinned 내부 순서 유지 (MySQL: FIELD)
+        assert popularPostsIdList != null;
+        var pinnedInnerOrderExpr = Expressions.numberTemplate(
                 Integer.class,
                 "FIELD({0}, {1})",
                 post.id,
                 Expressions.constant(popularPostsIdList)
-        )
-                : null;
+        );
 
-        return queryFactory
+        var query = queryFactory
                 .select(Projections.constructor(
                         PopularExpertPostRow.class,
                         post.id,
@@ -198,14 +192,25 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                         user.userName,
                         expert.profileImageUrl,
                         postImg.storedFileName
-                )
-                .orderBy(
-                        pinnedFirstOrderExpr != null ? pinnedFirstOrderExpr.asc() : null,
-                        pinnedInnerOrderExpr != null ? pinnedInnerOrderExpr.asc() : null,
-                        likeCount.id.countDistinct().desc(),
-                        post.createdAt.desc()
-                )
-                .limit(6)
+                );
+
+        // QueryDSL orderBy에 null 전달 방지: hasPinned 여부로 분기 처리
+        if (hasPinned) {
+            query.orderBy(
+                    pinnedFirstOrderExpr.asc(),
+                    pinnedInnerOrderExpr.asc(),
+                    likeCount.id.countDistinct().desc(),
+                    post.createdAt.desc()
+            );
+        } else {
+            query.orderBy(
+                    likeCount.id.countDistinct().desc(),
+                    post.createdAt.desc()
+            );
+        }
+
+        return query
+                .limit(limit)
                 .fetch();
     }
 
