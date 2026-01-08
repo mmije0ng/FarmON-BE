@@ -85,16 +85,15 @@ public class RedisConfig {
     @Bean
     public RedisCacheManager redisCacheManager(RedisConnectionFactory cf) {
         RedisCacheConfiguration base = RedisCacheConfiguration.defaultCacheConfig()
+                .entryTtl(Duration.ofSeconds(60)) // 기본 TTL
                 .disableCachingNullValues()
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()));
 
-        RedisCacheConfiguration homeCommunity = base.entryTtl(Duration.ofSeconds(60));
         RedisCacheConfiguration popularExpert = base.entryTtl(Duration.ofMinutes(5));
 
         return RedisCacheManager.builder(cf)
                 .cacheDefaults(base)
-                .withCacheConfiguration("home:community", homeCommunity)
                 .withCacheConfiguration("home:popularExpertColumn", popularExpert)
                 .build();
     }

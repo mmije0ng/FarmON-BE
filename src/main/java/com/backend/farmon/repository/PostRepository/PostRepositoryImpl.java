@@ -22,8 +22,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.*;
 
-import static com.backend.farmon.domain.QPostImg.postImg;
-
 @Slf4j
 @Repository
 @RequiredArgsConstructor
