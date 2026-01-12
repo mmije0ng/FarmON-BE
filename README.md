@@ -1,4 +1,4 @@
-# [성능 개선 보고서] 홈 화면 API 단계별 최적화 및 1,000 VUs 가용성 검증
+# [부하테스트 및 최적화] 홈 화면 API 단계별 최적화 및 동시 사용자 1,000 VUs 가용성 검증
 
 본 보고서는 홈 화면의 커뮤니티 게시글 조회 API를 대상으로, 초기 성능 측정부터 로직/인프라/아키텍처 최적화에 따른 시스템 임계치 변화를 정량적으로 분석한 기록입니다.
 
@@ -34,6 +34,8 @@
 
 <img width="1280" height="675" alt="v1_result_1" src="https://github.com/user-attachments/assets/d045e6f8-4323-4782-acf0-0a24ae35b3da" />
 <img width="1280" height="989" alt="v1_result_2" src="https://github.com/user-attachments/assets/4ea13c6b-080b-4892-b88d-4475ffbbf03f" />
+<img width="1280" height="851" alt="image" src="https://github.com/user-attachments/assets/1f1e09a6-9b11-4819-97f3-fdd3c2a5b437" />
+
 
 ### 2.2 실험 결과 (1,000 VUs)
 | 지표 항목 | 측정 결과 | 판정 및 의미 |
@@ -47,7 +49,7 @@
 
 ## 3. [v2] 1차 개선: QueryDSL 기반 단일 조회 (N+1 제거)
 
-### ✅ 변경 사항 (What was changed?)
+### ✅ 변경 사항
 - **쿼리 통합**: QueryDSL을 이용해 `JOIN` 및 `GROUP BY`를 활용한 **단일 집계 쿼리**로 리팩토링
 - **최적화 기법**: `COUNT(DISTINCT ...)`를 적용하여 조인 시 중복 집계 방지
 - **DTO Projection**: Entity 대신 조회 전용 DTO(**HomePostRow**)를 사용하여 영속성 컨텍스트 부하 절감
@@ -59,6 +61,8 @@
 
 <img width="1280" height="716" alt="v2_result_1" src="https://github.com/user-attachments/assets/23708d85-d470-4123-b3c8-b7e1b36b4a21" />
 <img width="1280" height="933" alt="v2_result_2" src="https://github.com/user-attachments/assets/914a33b3-17ee-44ec-b4be-3f14a6f38450" />
+<img width="1280" height="336" alt="image" src="https://github.com/user-attachments/assets/c6ed97a4-3618-4b71-a6a4-e46e9ce719a3" />
+
 
 ### 3.2 성능 지표 비교 (v1 vs v2)
 | 지표 항목 | v1 (Baseline) | v2 (로직 최적화) | 성과 |
@@ -71,7 +75,7 @@
 
 ## 4. [v3] 2차 개선: 인프라 설정 최적화 (WAS/DB 튜닝)
 
-### ✅ 변경 사항 (What was changed?)
+### ✅ 변경 사항
 - **HikariCP**: `maximum-pool-size: 30`, `connection-timeout: 30000` (커넥션 부족 해소)
 - **Tomcat**: `threads.max: 400`, `max-connections: 8192` (동시 요청 수용량 증대)
 - **RDS**: DB 파라미터 그룹 수정을 통해 `max_connections: 300` 확보
@@ -82,13 +86,14 @@
 - **③ [물리 임계점 식별]**: 설정을 확장했음에도 p(95)가 **3.30s**에서 정체됨. 현재 구조상 **물리적 Disk I/O 포화**로 판단됨.
 
 <img width="1280" height="717" alt="v3_result_1" src="https://github.com/user-attachments/assets/cc0ab432-26e8-43e1-b355-80ed0748dd11" />
+<img width="1280" height="915" alt="image" src="https://github.com/user-attachments/assets/a4ac54aa-83a8-4295-8f7f-ce8b78b7de56" />
 <img width="1280" height="322" alt="v3_result_3" src="https://github.com/user-attachments/assets/08322a78-6dff-40aa-8f83-371ab8de1951" />
 
 ---
 
 ## 5. [v4] 개선: Redis 캐시 도입 (In-memory 아키텍처)
 
-### ✅ 변경 사항 (What was changed?)
+### ✅ 변경 사항
 - **캐싱 전략**: 홈 커뮤니티 데이터를 `category:{PostType}` 키 구조로 **Redis**에 저장 (In-memory)
 - **유효 정책**: `TTL 60초` 적용 및 좋아요/댓글 변경 시 `afterCommit` 시점에 **선택적 캐시 무효화(Evict)**
 - **직렬화**: `GenericJackson2JsonRedisSerializer`를 통한 DTO 직렬화
@@ -99,7 +104,9 @@
 - **③ [안정성 유지]**: 총 요청 수 **77.3만 건**으로 폭증했으나, 에러율 **0.009%**로 신뢰성 있는 응답 유지.
 
 <img width="1280" height="706" alt="v4_result_1" src="https://github.com/user-attachments/assets/560b66db-4e21-47fa-bfdc-7e07f844d14f" />
-<img width="1280" height="584" alt="v4_result_3" src="https://github.com/user-attachments/assets/9678d362-afd9-4005-a415-46f93f8c07bb" />
+<img width="1280" height="896" alt="image" src="https://github.com/user-attachments/assets/05a7555e-e7b8-478b-879b-143b3e2ba44b" />
+<img width="1280" height="584" alt="image" src="https://github.com/user-attachments/assets/b68da464-c7ca-4602-92a0-2acaed73759d" />
+
 
 ### 5.2 성능 지표 비교 (v1 ~ v4)
 | 지표 항목 | v1 (Baseline) | v2 (로직) | v3 (설정) | v4 (Redis) | 성과 (v1 vs v4) |
